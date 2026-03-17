@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+  user-service:
+    build: ./user-service
+    ports:
+      - "3001:3001"
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - PORT=3001
+
+  items-service:
+    build: ./items-service
+    ports:
+      - "3002:3002"
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - PORT=3002
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"

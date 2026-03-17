@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Playwright Practice App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- NAVIGATION HEADER -->
+  <header class="nav-header" role="banner">
+    <div class="container">
+      <span class="nav-brand">Playwright Practice App</span>
+      <nav class="nav-actions" aria-label="User navigation">
+        <div id="user-info" style="display:none;" aria-live="polite">
+          <span class="user-name" id="user-display-name"></span>
+          <button class="btn btn-sm btn-outline" id="logout-btn" style="color:white;border-color:white;" aria-label="Log out">Logout</button>
+        </div>
+        <div id="auth-nav-btns">
+          <button class="btn btn-sm btn-outline" id="show-register-btn" style="color:white;border-color:white;">Register</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" role="status" aria-live="polite" aria-atomic="false"></div>
+
+  <main class="container" style="padding-top:32px;padding-bottom:64px;">
+
+    <!-- ============================================
+         AUTH SECTION
+         ============================================ -->
+    <section class="section" id="auth-section" aria-labelledby="auth-section-title">
+      <h2 class="section-title" id="auth-section-title">Authentication</h2>
+      <div class="auth-container">
+        <div class="auth-tabs" role="tablist" aria-label="Authentication options">
+          <button class="auth-tab active" id="login-tab-btn" role="tab" aria-selected="true" aria-controls="login-form-panel">Login</button>
+          <button class="auth-tab" id="register-tab-btn" role="tab" aria-selected="false" aria-controls="register-form-panel">Register</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div id="login-form-panel" class="auth-form active" role="tabpanel" aria-labelledby="login-tab-btn">
+          <form id="login-form" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="login-email">Email address</label>
+              <input type="email" class="form-control" id="login-email" name="email" placeholder="you@example.com" autocomplete="email" required aria-required="true" aria-describedby="login-email-error">
+              <div class="invalid-feedback" id="login-email-error" role="alert">Please enter a valid email address.</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="login-password">Password</label>
+              <input type="password" class="form-control" id="login-password" name="password" placeholder="Your password" autocomplete="current-password" required aria-required="true" aria-describedby="login-password-error">
+              <div class="invalid-feedback" id="login-password-error" role="alert">Password is required.</div>
+            </div>
+            <div class="invalid-feedback" id="login-general-error" role="alert"></div>
+            <button type="submit" class="btn btn-primary" id="login-submit" style="width:100%;">Login</button>
+          </form>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="register-form-panel" class="auth-form" role="tabpanel" aria-labelledby="register-tab-btn">
+          <form id="register-form" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="register-name">Full Name</label>
+              <input type="text" class="form-control" id="register-name" name="name" placeholder="Your name" autocomplete="name" required aria-required="true" aria-describedby="register-name-error">
+              <div class="invalid-feedback" id="register-name-error" role="alert">Name is required.</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="register-email">Email address</label>
+              <input type="email" class="form-control" id="register-email" name="email" placeholder="you@example.com" autocomplete="email" required aria-required="true" aria-describedby="register-email-error">
+              <div class="invalid-feedback" id="register-email-error" role="alert">Please enter a valid email address.</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="register-password">Password</label>
+              <input type="password" class="form-control" id="register-password" name="password" placeholder="Minimum 6 characters" autocomplete="new-password" required aria-required="true" aria-describedby="register-password-error">
+              <div class="invalid-feedback" id="register-password-error" role="alert">Password must be at least 6 characters.</div>
+            </div>
+            <div class="invalid-feedback" id="register-general-error" role="alert"></div>
+            <button type="submit" class="btn btn-primary" id="register-submit" style="width:100%;">Create Account</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         ITEMS SECTION (Auth Required)
+         ============================================ -->
+    <section class="section" id="items-section" aria-labelledby="items-section-title">
+      <h2 class="section-title" id="items-section-title">My Items</h2>
+
+      <!-- Create Item Form -->
+      <div class="create-item-form" role="form" aria-label="Create new item">
+        <div class="form-group">
+          <label class="form-label" for="new-item-title">Item Title</label>
+          <input type="text" class="form-control" id="new-item-title" placeholder="What needs to be done?" aria-label="New item title">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="new-item-category">Category</label>
+          <select class="form-control" id="new-item-category" aria-label="Item category">
+            <option value="work">Work</option>
+            <option value="personal">Personal</option>
+            <option value="shopping">Shopping</option>
+            <option value="health">Health</option>
+            <option value="learning">Learning</option>
+          </select>
+        </div>
+        <div class="form-group" style="display:flex;align-items:flex-end;">
+          <button class="btn btn-success" id="create-item-btn" aria-label="Create item">Add Item</button>
+        </div>
+      </div>
+
+      <!-- Filter Controls -->
+      <div class="items-controls" role="search" aria-label="Filter items">
+        <div class="form-group">
+          <label class="form-label" for="filter-category">Filter by Category</label>
+          <select class="form-control" id="filter-category" aria-label="Filter by category">
+            <option value="">All Categories</option>
+            <option value="work">Work</option>
+            <option value="personal">Personal</option>
+            <option value="shopping">Shopping</option>
+            <option value="health">Health</option>
+            <option value="learning">Learning</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="filter-done">Status</label>
+          <select class="form-control" id="filter-done" aria-label="Filter by status">
+            <option value="">All</option>
+            <option value="false">Pending</option>
+            <option value="true">Done</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="filter-search">Search</label>
+          <input type="text" class="form-control" id="filter-search" placeholder="Search items..." aria-label="Search items">
+        </div>
+        <div class="form-group" style="display:flex;align-items:flex-end;gap:8px;">
+          <button class="btn btn-primary btn-sm" id="apply-filter-btn" aria-label="Apply filters">Apply</button>
+          <button class="btn btn-secondary btn-sm" id="reset-filter-btn" aria-label="Reset filters">Reset</button>
+        </div>
+      </div>
+
+      <!-- Items List -->
+      <ul id="items-list" aria-label="Items list" aria-live="polite">
+        <li class="text-muted text-center" id="items-empty-msg">No items to display. Create one above!</li>
+      </ul>
+
+      <!-- Items Pagination -->
+      <nav id="items-pagination" aria-label="Items pagination" style="display:none;">
+        <div class="pagination">
+          <span class="pagination-info">Page <span id="items-current-page">1</span> of <span id="items-total-pages">1</span></span>
+          <button class="page-btn" id="items-prev-btn" aria-label="Previous page" disabled>&laquo;</button>
+          <button class="page-btn active" id="items-page-display" aria-current="page">1</button>
+          <button class="page-btn" id="items-next-btn" aria-label="Next page">&raquo;</button>
+        </div>
+      </nav>
+    </section>
+
+    <!-- ============================================
+         FORM ELEMENTS SECTION
+         ============================================ -->
+    <section class="section" aria-labelledby="forms-section-title">
+      <h2 class="section-title" id="forms-section-title">Form Elements</h2>
+
+      <div class="row">
+        <div class="col">
+          <div class="form-group">
+            <label class="form-label" for="text-input">Text Input</label>
+            <input type="text" class="form-control" id="text-input" placeholder="Enter text here" aria-label="Text input example">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="email-input">Email Input</label>
+            <input type="email" class="form-control" id="email-input" placeholder="email@example.com" aria-label="Email input example">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="password-input">Password Input</label>
+            <input type="password" class="form-control" id="password-input" placeholder="Enter password" aria-label="Password input example">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="number-input">Number Input</label>
+            <input type="number" class="form-control" id="number-input" placeholder="42" min="0" max="999" aria-label="Number input example">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="tel-input">Telephone Input</label>
+            <input type="tel" class="form-control" id="tel-input" placeholder="+1 (555) 000-0000" aria-label="Telephone input example">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="url-input">URL Input</label>
+            <input type="url" class="form-control" id="url-input" placeholder="https://example.com" aria-label="URL input example">
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="form-group">
+            <label class="form-label" for="textarea-input">Textarea</label>
+            <textarea class="form-control" id="textarea-input" rows="4" placeholder="Enter multiline text here..." aria-label="Textarea example"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="disabled-input">Disabled Input</label>
+            <input type="text" class="form-control" id="disabled-input" value="Cannot edit this" disabled aria-disabled="true" aria-label="Disabled input example">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="readonly-input">Readonly Input</label>
+            <input type="text" class="form-control" id="readonly-input" value="Read only value" readonly aria-readonly="true" aria-label="Readonly input example">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="date-input">Date Picker</label>
+            <input type="date" class="form-control" id="date-input" aria-label="Date picker example">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="file-input">File Upload</label>
+            <input type="file" class="form-control" id="file-input" aria-label="File upload example" accept=".txt,.pdf,.jpg,.png">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="range-input">Range Slider: <span id="range-value">50</span></label>
+            <div class="range-wrapper">
+              <input type="range" class="form-control" id="range-input" min="0" max="100" value="50" aria-label="Range slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+              <span class="range-value-display" id="range-value-badge">50</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SELECTS & TOGGLES SECTION
+         ============================================ -->
+    <section class="section" aria-labelledby="selects-section-title">
+      <h2 class="section-title" id="selects-section-title">Selects, Checkboxes & Toggles</h2>
+
+      <div class="row">
+        <div class="col">
+          <div class="form-group">
+            <label class="form-label" for="native-select">Native Select</label>
+            <select class="form-control" id="native-select" aria-label="Native select example">
+              <option value="">Choose an option</option>
+              <option value="option1">Option 1</option>
+              <option value="option2">Option 2</option>
+              <option value="option3">Option 3</option>
+              <option value="option4">Option 4</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="multi-select">Multi-Select <span class="text-muted text-sm">(hold Ctrl/Cmd)</span></label>
+            <select class="form-control" id="multi-select" multiple aria-label="Multi-select example" aria-multiselectable="true">
+              <option value="opt1">Option A</option>
+              <option value="opt2">Option B</option>
+              <option value="opt3">Option C</option>
+              <option value="opt4">Option D</option>
+              <option value="opt5">Option E</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Toggle Switch</label>
+            <div class="toggle-wrapper">
+              <label class="toggle-switch" for="toggle-switch" aria-label="Toggle switch example">
+                <input type="checkbox" id="toggle-switch" role="switch" aria-checked="false">
+                <span class="toggle-slider" aria-hidden="true"></span>
+              </label>
+              <span id="toggle-status" class="text-sm text-muted">Off</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <fieldset>
+            <legend class="form-label">Checkboxes</legend>
+            <div class="form-check">
+              <input type="checkbox" id="checkbox-1" name="checkboxes" value="check1" aria-label="Checkbox option 1">
+              <label class="form-check-label" for="checkbox-1">Option 1</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="checkbox-2" name="checkboxes" value="check2" aria-label="Checkbox option 2" checked>
+              <label class="form-check-label" for="checkbox-2">Option 2 (pre-checked)</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="checkbox-3" name="checkboxes" value="check3" aria-label="Checkbox option 3">
+              <label class="form-check-label" for="checkbox-3">Option 3</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="checkbox-4" name="checkboxes" value="check4" aria-label="Checkbox option 4" disabled>
+              <label class="form-check-label" for="checkbox-4">Option 4 (disabled)</label>
+            </div>
+          </fieldset>
+
+          <fieldset style="margin-top: 16px;">
+            <legend class="form-label">Radio Group</legend>
+            <div class="form-check">
+              <input type="radio" id="radio-a" name="radio-group" value="a" aria-label="Radio option A" checked>
+              <label class="form-check-label" for="radio-a">Option A</label>
+            </div>
+            <div class="form-check">
+              <input type="radio" id="radio-b" name="radio-group" value="b" aria-label="Radio option B">
+              <label class="form-check-label" for="radio-b">Option B</label>
+            </div>
+            <div class="form-check">
+              <input type="radio" id="radio-c" name="radio-group" value="c" aria-label="Radio option C">
+              <label class="form-check-label" for="radio-c">Option C</label>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         TABS SECTION
+         ============================================ -->
+    <section class="section" aria-labelledby="tabs-section-title">
+      <h2 class="section-title" id="tabs-section-title">Tab Panels</h2>
+
+      <div class="tabs-container">
+        <div role="tablist" aria-label="Demo tabs">
+          <button
+            role="tab"
+            id="tab-btn-1"
+            data-tab="tab1"
+            aria-selected="true"
+            aria-controls="tab-panel-1"
+            tabindex="0">
+            Tab 1
+          </button>
+          <button
+            role="tab"
+            id="tab-btn-2"
+            data-tab="tab2"
+            aria-selected="false"
+            aria-controls="tab-panel-2"
+            tabindex="-1">
+            Tab 2
+          </button>
+          <button
+            role="tab"
+            id="tab-btn-3"
+            data-tab="tab3"
+            aria-selected="false"
+            aria-controls="tab-panel-3"
+            tabindex="-1">
+            Tab 3
+          </button>
+        </div>
+
+        <div role="tabpanel" id="tab-panel-1" aria-labelledby="tab-btn-1" tabindex="0">
+          <h3>Tab 1 Content</h3>
+          <p>This is the content for Tab 1. You can put any content here — forms, tables, lists, etc.</p>
+          <p>Tab panels support full keyboard navigation using arrow keys.</p>
+        </div>
+
+        <div role="tabpanel" id="tab-panel-2" aria-labelledby="tab-btn-2" tabindex="0" hidden>
+          <h3>Tab 2 Content</h3>
+          <p>This is the content for Tab 2. Click or use keyboard arrow keys to switch tabs.</p>
+          <ul style="margin-left:20px;margin-top:8px;">
+            <li>Item one in tab 2</li>
+            <li>Item two in tab 2</li>
+            <li>Item three in tab 2</li>
+          </ul>
+        </div>
+
+        <div role="tabpanel" id="tab-panel-3" aria-labelledby="tab-btn-3" tabindex="0" hidden>
+          <h3>Tab 3 Content</h3>
+          <p>This is the content for Tab 3. Tabs are a common UI pattern for organizing content.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         ACCORDION SECTION
+         ============================================ -->
+    <section class="section" aria-labelledby="accordion-section-title">
+      <h2 class="section-title" id="accordion-section-title">Accordion</h2>
+
+      <div class="accordion" role="list">
+        <details class="accordion-item" id="accordion-1" role="listitem">
+          <summary aria-expanded="false" aria-controls="accordion-content-1">
+            What is Playwright?
+          </summary>
+          <div class="accordion-content" id="accordion-content-1">
+            Playwright is an open-source automation library for browser testing and web scraping.
+            It enables reliable end-to-end testing for modern web apps. It supports Chromium, Firefox, and WebKit.
+          </div>
+        </details>
+
+        <details class="accordion-item" id="accordion-2" role="listitem">
+          <summary aria-expanded="false" aria-controls="accordion-content-2">
+            How does Playwright differ from Selenium?
+          </summary>
+          <div class="accordion-content" id="accordion-content-2">
+            Playwright provides a more modern API with auto-waiting built in, better support for modern web features
+            like shadow DOM, service workers, and network interception. It's typically faster and more reliable.
+          </div>
+        </details>
+
+        <details class="accordion-item" id="accordion-3" role="listitem">
+          <summary aria-expanded="false" aria-controls="accordion-content-3">
+            What testing frameworks work with Playwright?
+          </summary>
+          <div class="accordion-content" id="accordion-content-3">
+            Playwright has its own built-in test runner (@playwright/test), but it also works with Jest,
+            Mocha, Jasmine, and other testing frameworks. The built-in runner supports parallel execution,
+            fixtures, and reporting.
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============================================
+         MODAL & OVERLAY SECTION
+         ============================================ -->
+    <section class="section" aria-labelledby="overlays-section-title">
+      <h2 class="section-title" id="overlays-section-title">Modals, Toasts & Tooltips</h2>
+
+      <div class="row" style="flex-wrap:wrap;gap:16px;align-items:center;">
+        <button class="btn btn-primary" id="open-modal-btn" aria-haspopup="dialog">Open Modal</button>
+        <button class="btn btn-secondary" id="show-toast-btn" aria-label="Show toast notification">Show Toast</button>
+        <button class="btn btn-success" id="start-progress-btn" aria-label="Start progress animation">Start Progress</button>
+
+        <div class="tooltip-wrapper" style="display:inline-block;">
+          <button class="btn btn-outline" id="tooltip-trigger" aria-describedby="demo-tooltip">Hover for Tooltip</button>
+          <div role="tooltip" id="demo-tooltip">This is a helpful tooltip message!</div>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div style="margin-top: 24px;">
+        <label class="form-label" id="progress-label">Progress</label>
+        <div class="progress-container" aria-labelledby="progress-label">
+          <div
+            role="progressbar"
+            id="progress-bar"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+            style="width: 0%;">
+          </div>
+        </div>
+        <div class="progress-label"><span id="progress-percent">0</span>%</div>
+      </div>
+    </section>
+
+    <!-- MODAL DIALOG -->
+    <dialog class="modal" id="demo-modal" aria-labelledby="modal-title" aria-modal="true">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Demo Modal</h3>
+        <button class="modal-close" id="close-modal-btn" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>This is a native HTML <code>&lt;dialog&gt;</code> element used as a modal.</p>
+        <p>It supports focus trapping, backdrop click to close, and the <code>ESC</code> key to dismiss.</p>
+        <div class="form-group" style="margin-top:16px;">
+          <label class="form-label" for="modal-input">Input inside modal</label>
+          <input type="text" class="form-control" id="modal-input" placeholder="Type something...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" id="cancel-modal-btn">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="confirm-modal-btn">Confirm</button>
+      </div>
+    </dialog>
+
+    <!-- ============================================
+         TABLE SECTION
+         ============================================ -->
+    <section class="section" aria-labelledby="table-section-title">
+      <h2 class="section-title" id="table-section-title">Sortable Table</h2>
+
+      <div class="table-responsive">
+        <table id="data-table" aria-label="Data table with sortable columns">
+          <thead>
+            <tr>
+              <th data-sort="title" aria-sort="none" scope="col" tabindex="0" role="columnheader">Title</th>
+              <th data-sort="category" aria-sort="none" scope="col" tabindex="0" role="columnheader">Category</th>
+              <th data-sort="done" aria-sort="none" scope="col" tabindex="0" role="columnheader">Status</th>
+              <th scope="col">Created</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr>
+              <td>Buy groceries</td>
+              <td><span class="badge badge-shopping item-category">shopping</span></td>
+              <td><span class="status-pending">Pending</span></td>
+              <td>2024-01-01</td>
+            </tr>
+            <tr>
+              <td>Morning run</td>
+              <td><span class="badge badge-health item-category">health</span></td>
+              <td><span class="status-done">Done</span></td>
+              <td>2024-01-02</td>
+            </tr>
+            <tr>
+              <td>Read Playwright docs</td>
+              <td><span class="badge badge-learning item-category">learning</span></td>
+              <td><span class="status-pending">Pending</span></td>
+              <td>2024-01-03</td>
+            </tr>
+            <tr>
+              <td>Finish project report</td>
+              <td><span class="badge badge-work item-category">work</span></td>
+              <td><span class="status-pending">Pending</span></td>
+              <td>2024-01-04</td>
+            </tr>
+            <tr>
+              <td>Meditate</td>
+              <td><span class="badge badge-personal item-category">personal</span></td>
+              <td><span class="status-done">Done</span></td>
+              <td>2024-01-05</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table Pagination -->
+      <nav aria-label="Table pagination">
+        <div class="pagination">
+          <span class="pagination-info">Page <span id="current-page">1</span> of <span id="total-pages">3</span></span>
+          <button class="page-btn" id="pagination-prev" aria-label="Previous page" disabled>&laquo;</button>
+          <button class="page-btn active" data-page="1" aria-label="Page 1" aria-current="page">1</button>
+          <button class="page-btn" data-page="2" aria-label="Page 2">2</button>
+          <button class="page-btn" data-page="3" aria-label="Page 3">3</button>
+          <button class="page-btn" id="pagination-next" aria-label="Next page">&raquo;</button>
+        </div>
+      </nav>
+    </section>
+
+    <!-- ============================================
+         LOAD MORE SECTION
+         ============================================ -->
+    <section class="section" aria-labelledby="loadmore-section-title">
+      <h2 class="section-title" id="loadmore-section-title">Load More</h2>
+
+      <ul id="loadmore-list" aria-label="Loadmore list" aria-live="polite">
+        <li>Initial item 1</li>
+        <li>Initial item 2</li>
+        <li>Initial item 3</li>
+      </ul>
+
+      <button class="btn btn-outline" id="load-more-btn" aria-label="Load more items">Load More</button>
+
+      <!-- Skeleton Loading -->
+      <div id="skeleton-container" class="skeleton-wrapper" style="margin-top:16px;display:none;" aria-label="Loading content" aria-busy="true">
+        <div class="skeleton skeleton-text" style="width:80%;"></div>
+        <div class="skeleton skeleton-text" style="width:60%;"></div>
+        <div class="skeleton skeleton-rect"></div>
+        <div class="skeleton skeleton-text"></div>
+        <div class="skeleton skeleton-text" style="width:40%;"></div>
+      </div>
+
+      <!-- Always-present skeletons for test detection -->
+      <div style="margin-top:16px;" aria-hidden="true">
+        <div class="skeleton skeleton-text" style="width:30%;opacity:0.3;"></div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         DRAG AND DROP SECTION
+         ============================================ -->
+    <section class="section" aria-labelledby="dnd-section-title">
+      <h2 class="section-title" id="dnd-section-title">Drag and Drop</h2>
+      <p class="text-muted mb-md">Drag items from the source into the drop zone.</p>
+
+      <div class="drag-container">
+        <div class="drag-source" aria-label="Draggable items source">
+          <div class="drag-source-title">Items to drag</div>
+          <div class="draggable-item" draggable="true" id="drag-item-1" aria-grabbed="false" tabindex="0" role="option" aria-label="Draggable item: Alpha">
+            Alpha
+          </div>
+          <div class="draggable-item" draggable="true" id="drag-item-2" aria-grabbed="false" tabindex="0" role="option" aria-label="Draggable item: Beta">
+            Beta
+          </div>
+          <div class="draggable-item" draggable="true" id="drag-item-3" aria-grabbed="false" tabindex="0" role="option" aria-label="Draggable item: Gamma">
+            Gamma
+          </div>
+          <div class="draggable-item" draggable="true" id="drag-item-4" aria-grabbed="false" tabindex="0" role="option" aria-label="Draggable item: Delta">
+            Delta
+          </div>
+        </div>
+
+        <div
+          class="drag-zone"
+          id="drop-zone-1"
+          aria-label="Drop zone"
+          aria-dropeffect="move"
+          role="listbox"
+          tabindex="0">
+          <div class="drag-zone-label">Drop items here</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         IFRAME SECTION
+         ============================================ -->
+    <section class="section" aria-labelledby="iframe-section-title">
+      <h2 class="section-title" id="iframe-section-title">Embedded iFrame</h2>
+      <p class="text-muted mb-md">An embedded iframe containing a nested form.</p>
+
+      <iframe
+        id="demo-iframe"
+        src="iframe-content.html"
+        title="Nested form in iframe"
+        aria-label="Demo iframe with nested form">
+      </iframe>
+    </section>
+
+  </main>
+
+  <footer style="text-align:center;padding:24px;color:var(--color-text-muted);font-size:var(--font-size-sm);border-top:1px solid var(--color-border);">
+    Playwright Practice App &mdash; Built for testing &amp; learning
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
