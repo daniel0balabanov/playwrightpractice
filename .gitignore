@@ -4,3 +4,4 @@ allure-report
 tests/allure-results
 playwright-report/
 tests/test-results
+tests/node_modules
