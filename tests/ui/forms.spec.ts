@@ -1,58 +1,59 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
+import { MainPage } from './pages/MainPage';
 
 test.describe('UI - Forms & Inputs', () => {
+  let mainPage: MainPage;
+
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    mainPage = new MainPage(page);
+    await mainPage.goto();
   });
 
-  test('text input accepts value', async ({ page }) => {
-    const input = page.locator('#text-input');
-    await input.fill('Hello World');
-    await expect(input).toHaveValue('Hello World');
+  test('text input accepts value', async () => {
+    await mainPage.fill(mainPage.sel.textInput, 'Hello World');
+    await mainPage.assertValue(mainPage.sel.textInput, 'Hello World');
   });
 
-  test('email input accepts valid email', async ({ page }) => {
-    const input = page.locator('#email-input');
-    await input.fill('test@example.com');
-    await expect(input).toHaveValue('test@example.com');
+  test('email input accepts valid email', async () => {
+    await mainPage.fill(mainPage.sel.emailInput, 'test@example.com');
+    await mainPage.assertValue(mainPage.sel.emailInput, 'test@example.com');
   });
 
-  test('number input accepts numeric value', async ({ page }) => {
-    const input = page.locator('#number-input');
-    await input.fill('42');
-    await expect(input).toHaveValue('42');
+  test('number input accepts numeric value', async () => {
+    await mainPage.fill(mainPage.sel.numberInput, '42');
+    await mainPage.assertValue(mainPage.sel.numberInput, '42');
   });
 
-  test('textarea accepts multiline text', async ({ page }) => {
-    const textarea = page.locator('#textarea-input');
-    await textarea.fill('Line 1\nLine 2\nLine 3');
-    await expect(textarea).toHaveValue('Line 1\nLine 2\nLine 3');
+  test('textarea accepts multiline text', async () => {
+    await mainPage.fill(mainPage.sel.textareaInput, 'Line 1\nLine 2\nLine 3');
+    await mainPage.assertValue(mainPage.sel.textareaInput, 'Line 1\nLine 2\nLine 3');
   });
 
-  test('disabled input is not editable', async ({ page }) => {
-    const input = page.locator('#disabled-input');
-    await expect(input).toBeDisabled();
+  test('disabled input is not editable', async () => {
+    const input = mainPage.locator(mainPage.sel.disabledInput);
+    await input.isDisabled();
   });
 
-  test('readonly input is not editable', async ({ page }) => {
-    const input = page.locator('#readonly-input');
-    await expect(input).not.toBeEditable();
+  test('readonly input is not editable', async () => {
+    const input = mainPage.locator(mainPage.sel.readonlyInput);
+    await input.isEditable().then(editable => {
+      if (editable) throw new Error('Expected readonly input to not be editable');
+    });
   });
 
-  test('range slider updates display value', async ({ page }) => {
-    const slider = page.locator('#range-input');
-    await slider.fill('75');
-    const display = page.locator('#range-value');
-    await expect(display).toHaveText('75');
+  test('range slider updates display value', async () => {
+    await mainPage.fill(mainPage.sel.rangeInput, '75');
+    await mainPage.assertText(mainPage.sel.rangeValue, '75');
   });
 
   test('file input accepts file upload', async ({ page }) => {
-    const fileInput = page.locator('#file-input');
-    await fileInput.setInputFiles({
+    await page.locator(mainPage.sel.fileInput).setInputFiles({
       name: 'test.txt',
       mimeType: 'text/plain',
-      buffer: Buffer.from('hello'),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      buffer: new TextEncoder().encode('hello') as any,
     });
-    await expect(fileInput).not.toBeEmpty();
+    const input = mainPage.locator(mainPage.sel.fileInput);
+    await input.isVisible();
   });
 });

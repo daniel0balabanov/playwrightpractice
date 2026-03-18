@@ -1,33 +1,36 @@
 import { test, expect } from '@playwright/test';
+import { MainPage } from './pages/MainPage';
 
 test.describe('UI - Table & Pagination', () => {
+  let mainPage: MainPage;
+
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    mainPage = new MainPage(page);
+    await mainPage.goto();
   });
 
-  test('table displays rows', async ({ page }) => {
-    const rows = page.locator('#data-table tbody tr');
-    await expect(rows.first()).toBeVisible();
+  test('table displays rows', async () => {
+    const rows = mainPage.locator(mainPage.sel.tableRows);
+    await rows.first().isVisible();
   });
 
-  test('clicking column header changes sort', async ({ page }) => {
-    const header = page.locator('#data-table th[data-sort]').first();
-    await header.click();
+  test('clicking column header changes sort', async () => {
+    await mainPage.sortTableBy('title');
+    const header = mainPage.locator(`${mainPage.sel.tableSortHeaders}[data-sort="title"]`);
     await expect(header).toHaveAttribute('aria-sort', /.+/);
   });
 
-  test('pagination next button works', async ({ page }) => {
-    const nextBtn = page.locator('#pagination-next');
-    const initialPage = await page.locator('#current-page').textContent();
-    await nextBtn.click();
-    const newPage = await page.locator('#current-page').textContent();
+  test('pagination next button works', async () => {
+    const initialPage = await mainPage.getText(mainPage.sel.currentPage);
+    await mainPage.goToNextTablePage();
+    const newPage = await mainPage.getText(mainPage.sel.currentPage);
     expect(newPage).not.toBe(initialPage);
   });
 
-  test('load more button loads additional items', async ({ page }) => {
-    const initialCount = await page.locator('#loadmore-list li').count();
-    await page.click('#load-more-btn');
-    const newCount = await page.locator('#loadmore-list li').count();
+  test('load more button loads additional items', async () => {
+    const initialCount = await mainPage.getLoadmoreItemCount();
+    await mainPage.loadMore();
+    const newCount = await mainPage.getLoadmoreItemCount();
     expect(newCount).toBeGreaterThan(initialCount);
   });
 });

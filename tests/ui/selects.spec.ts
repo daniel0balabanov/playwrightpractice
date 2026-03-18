@@ -1,42 +1,47 @@
 import { test, expect } from '@playwright/test';
+import { MainPage } from './pages/MainPage';
 
 test.describe('UI - Selects & Toggles', () => {
+  let mainPage: MainPage;
+
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    mainPage = new MainPage(page);
+    await mainPage.goto();
   });
 
-  test('native select changes value', async ({ page }) => {
-    await page.selectOption('#native-select', 'option2');
-    await expect(page.locator('#native-select')).toHaveValue('option2');
+  test('native select changes value', async () => {
+    await mainPage.selectOption(mainPage.sel.nativeSelect, 'option2');
+    await mainPage.assertValue(mainPage.sel.nativeSelect, 'option2');
   });
 
-  test('multi-select allows multiple selections', async ({ page }) => {
-    await page.selectOption('#multi-select', ['opt1', 'opt2']);
-    const values = await page.locator('#multi-select').evaluate((el: HTMLSelectElement) =>
-      Array.from(el.selectedOptions).map(o => o.value)
+  test('multi-select allows multiple selections', async () => {
+    await mainPage.selectOption(mainPage.sel.multiSelect, ['opt1', 'opt2']);
+    const values = await mainPage.locator(mainPage.sel.multiSelect).evaluate(
+      (el: HTMLSelectElement) => Array.from(el.selectedOptions).map(o => o.value)
     );
     expect(values).toContain('opt1');
     expect(values).toContain('opt2');
   });
 
-  test('checkbox can be checked and unchecked', async ({ page }) => {
-    const checkbox = page.locator('#checkbox-1');
-    await checkbox.check();
-    await expect(checkbox).toBeChecked();
-    await checkbox.uncheck();
-    await expect(checkbox).not.toBeChecked();
+  test('checkbox can be checked and unchecked', async () => {
+    await mainPage.check(mainPage.sel.checkbox1);
+    await mainPage.assertChecked(mainPage.sel.checkbox1);
+    await mainPage.uncheck(mainPage.sel.checkbox1);
+    const checked = await mainPage.isChecked(mainPage.sel.checkbox1);
+    expect(checked).toBe(false);
   });
 
-  test('radio group allows single selection', async ({ page }) => {
-    await page.locator('#radio-b').check();
-    await expect(page.locator('#radio-b')).toBeChecked();
-    await expect(page.locator('#radio-a')).not.toBeChecked();
+  test('radio group allows single selection', async () => {
+    await mainPage.check(mainPage.sel.radioB);
+    await mainPage.assertChecked(mainPage.sel.radioB);
+    const aChecked = await mainPage.isChecked(mainPage.sel.radioA);
+    expect(aChecked).toBe(false);
   });
 
-  test('toggle switch can be toggled', async ({ page }) => {
-    const toggle = page.locator('#toggle-switch');
-    const initialState = await toggle.isChecked();
-    await toggle.click();
-    expect(await toggle.isChecked()).toBe(!initialState);
+  test('toggle switch can be toggled', async () => {
+    const initialState = await mainPage.isChecked(mainPage.sel.toggleSwitch);
+    await mainPage.click(mainPage.sel.toggleSwitch);
+    const newState = await mainPage.isChecked(mainPage.sel.toggleSwitch);
+    expect(newState).toBe(!initialState);
   });
 });

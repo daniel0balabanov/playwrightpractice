@@ -1,38 +1,35 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
+import { MainPage } from './pages/MainPage';
 
 test.describe('UI - Overlays: Modal & Toast', () => {
+  let mainPage: MainPage;
+
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    mainPage = new MainPage(page);
+    await mainPage.goto();
   });
 
-  test('modal opens and closes', async ({ page }) => {
-    await page.click('#open-modal-btn');
-    const dialog = page.locator('#demo-modal');
-    await expect(dialog).toBeVisible();
-    await page.click('#close-modal-btn');
-    await expect(dialog).not.toBeVisible();
+  test('modal opens and closes', async () => {
+    await mainPage.openModal();
+    await mainPage.assertVisible(mainPage.sel.demoModal);
+    await mainPage.closeModal();
+    await mainPage.assertHidden(mainPage.sel.demoModal);
   });
 
-  test('toast notification appears and disappears', async ({ page }) => {
-    await page.click('#show-toast-btn');
-    const toast = page.locator('#toast-container .toast');
-    await expect(toast).toBeVisible();
-    await expect(toast).toBeHidden({ timeout: 5000 });
+  test('toast notification appears and disappears', async () => {
+    await mainPage.showToast();
+    await mainPage.assertVisible(mainPage.sel.toast);
+    await mainPage.waitForHidden(mainPage.sel.toast);
   });
 
-  test('tooltip is visible on hover', async ({ page }) => {
-    await page.hover('#tooltip-trigger');
-    const tooltip = page.locator('[role="tooltip"]');
-    await expect(tooltip).toBeVisible();
+  test('tooltip is visible on hover', async () => {
+    await mainPage.hover(mainPage.sel.tooltipTrigger);
+    await mainPage.assertVisible(mainPage.sel.tooltip);
   });
 
-  test('progress bar reaches 100%', async ({ page }) => {
-    await page.click('#start-progress-btn');
-    const progressBar = page.locator('[role="progressbar"]');
-    await page.waitForFunction(() => {
-      const bar = document.querySelector('[role="progressbar"]');
-      return bar && parseInt(bar.getAttribute('aria-valuenow') || '0') >= 100;
-    }, { timeout: 10000 });
-    await expect(progressBar).toHaveAttribute('aria-valuenow', '100');
+  test('progress bar reaches 100%', async () => {
+    await mainPage.startProgress();
+    await mainPage.waitForProgressComplete();
+    await mainPage.assertAttribute(mainPage.sel.progressBar, 'aria-valuenow', '100');
   });
 });

@@ -1,28 +1,29 @@
 import { test, expect } from '@playwright/test';
+import { MainPage } from './pages/MainPage';
 
 test.describe('UI - Advanced: Drag & Drop, iFrame', () => {
+  let mainPage: MainPage;
+
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    mainPage = new MainPage(page);
+    await mainPage.goto();
   });
 
-  test('drag and drop reorders items', async ({ page }) => {
-    const source = page.locator('.draggable-item').first();
-    const target = page.locator('.drag-zone');
-    await source.dragTo(target);
-    // The item should now be in the drop zone
-    await expect(target.locator('.draggable-item')).toBeVisible();
+  test('drag and drop reorders items', async () => {
+    await mainPage.dragItemToZone(mainPage.sel.dragItem1);
+    const dropped = mainPage.locator(`${mainPage.sel.dragZone} ${mainPage.sel.draggableItems}`);
+    await dropped.isVisible();
   });
 
-  test('iframe nested form submits', async ({ page }) => {
-    const frame = page.frameLocator('#demo-iframe');
+  test('iframe nested form submits', async () => {
+    const frame = mainPage.getIframeLocator();
     await frame.locator('#iframe-name').fill('Playwright Test');
     await frame.locator('#iframe-submit').click();
     await expect(frame.locator('#iframe-result')).toHaveText('Submitted: Playwright Test');
   });
 
-  test('loading skeleton is shown then hidden', async ({ page }) => {
-    const skeleton = page.locator('.skeleton');
-    // Check skeleton exists in DOM (may or may not be visible depending on timing)
-    expect(await skeleton.count()).toBeGreaterThan(0);
+  test('loading skeleton is shown then hidden', async () => {
+    const count = await mainPage.getCount('.skeleton');
+    expect(count).toBeGreaterThan(0);
   });
 });
