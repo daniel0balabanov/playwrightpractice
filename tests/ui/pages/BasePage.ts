@@ -1,4 +1,4 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 
 export class BasePage {
   readonly page: Page;
@@ -77,30 +77,6 @@ export class BasePage {
 
   async isChecked(selector: string): Promise<boolean> {
     return this.page.locator(selector).isChecked();
-  }
-
-  async assertVisible(selector: string) {
-    await expect(this.page.locator(selector)).toBeVisible();
-  }
-
-  async assertHidden(selector: string) {
-    await expect(this.page.locator(selector)).toBeHidden();
-  }
-
-  async assertText(selector: string, text: string | RegExp) {
-    await expect(this.page.locator(selector)).toHaveText(text);
-  }
-
-  async assertValue(selector: string, value: string) {
-    await expect(this.page.locator(selector)).toHaveValue(value);
-  }
-
-  async assertChecked(selector: string) {
-    await expect(this.page.locator(selector)).toBeChecked();
-  }
-
-  async assertAttribute(selector: string, attr: string, value: string | RegExp) {
-    await expect(this.page.locator(selector)).toHaveAttribute(attr, value);
   }
 
   async waitForSelector(selector: string) {

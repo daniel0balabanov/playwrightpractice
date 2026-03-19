@@ -32,6 +32,10 @@ npm run test:integration    # integration tests only
 - `tests/integration/` — full user flows (register, login, manage items)
 - `tests/fixtures/` — reusable Playwright fixtures that create/teardown test users and items
 
+## Collaboration
+
+Before implementing any idea or change the user proposes, think it through and share your thoughts, concerns, and suggestions first. Only proceed with implementation after discussing the approach.
+
 ## Key Conventions
 
 - Fixtures in `tests/fixtures/` handle setup and teardown automatically — prefer them over manual API calls in tests.

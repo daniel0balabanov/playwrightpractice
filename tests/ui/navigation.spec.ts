@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import { MainPage } from './pages/MainPage';
+import { expect } from './assertions/expect';
 
 test.describe('UI - Navigation: Tabs & Accordion', () => {
   let mainPage: MainPage;
@@ -11,8 +12,8 @@ test.describe('UI - Navigation: Tabs & Accordion', () => {
 
   test('clicking a tab shows correct panel', async () => {
     await mainPage.clickTab(2);
-    await mainPage.assertVisible(mainPage.sel.tabPanel2);
-    await mainPage.assertHidden(mainPage.sel.tabPanel1);
+    await expect(mainPage.tabPanel2).toBeVisible();
+    await expect(mainPage.tabPanel1).toBeHidden();
   });
 
   test('accordion expands and collapses', async () => {

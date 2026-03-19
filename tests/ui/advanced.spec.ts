@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import { MainPage } from './pages/MainPage';
+import { expect } from './assertions/expect';
 
 test.describe('UI - Advanced: Drag & Drop, iFrame', () => {
   let mainPage: MainPage;

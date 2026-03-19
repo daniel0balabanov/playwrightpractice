@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import { MainPage } from './pages/MainPage';
+import { expect } from './assertions/expect';
 
 test.describe('UI - Selects & Toggles', () => {
   let mainPage: MainPage;
@@ -11,7 +12,7 @@ test.describe('UI - Selects & Toggles', () => {
 
   test('native select changes value', async () => {
     await mainPage.selectOption(mainPage.sel.nativeSelect, 'option2');
-    await mainPage.assertValue(mainPage.sel.nativeSelect, 'option2');
+    await expect(mainPage.nativeSelect).toHaveValue('option2');
   });
 
   test('multi-select allows multiple selections', async () => {
@@ -25,7 +26,7 @@ test.describe('UI - Selects & Toggles', () => {
 
   test('checkbox can be checked and unchecked', async () => {
     await mainPage.check(mainPage.sel.checkbox1);
-    await mainPage.assertChecked(mainPage.sel.checkbox1);
+    await expect(mainPage.checkbox1).toBeChecked();
     await mainPage.uncheck(mainPage.sel.checkbox1);
     const checked = await mainPage.isChecked(mainPage.sel.checkbox1);
     expect(checked).toBe(false);
@@ -33,7 +34,7 @@ test.describe('UI - Selects & Toggles', () => {
 
   test('radio group allows single selection', async () => {
     await mainPage.check(mainPage.sel.radioB);
-    await mainPage.assertChecked(mainPage.sel.radioB);
+    await expect(mainPage.radioB).toBeChecked();
     const aChecked = await mainPage.isChecked(mainPage.sel.radioA);
     expect(aChecked).toBe(false);
   });
