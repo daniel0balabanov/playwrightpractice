@@ -37,7 +37,7 @@ class LocatorAssertions {
     });
   }
 
-  async toHaveAttribute(attr: string, value: string | RegExp) {
+  async toHaveAttribute(attr: string, value: string | RegExp,) {
     await test.step(`Assert [${attr}="${value}"]: ${this.label}`, async () => {
       await playwrightExpect(this.locator).toHaveAttribute(attr, value);
     });
